@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ip.cynic.dao.BlogDao">
+
+	<resultMap type="Blog" id="BlogResult">
+		<result property="id" column="id" />
+		<result property="title" column="title" />
+		<result property="summary" column="summary" />
+		<result property="releaseDate" column="release_date" />
+		<result property="clickHit" column="click_hit" />
+		<result property="replyHit" column="reply_hit" />
+		<result property="content" column="content" />
+		<result property="keyword" column="keyword" />
+
+		<association property="blogType" column="type_id"
+			select="ip.cynic.dao.BlogTypeDao.fingTypeById"></association>
+	</resultMap>
+
+	<select id="findBlogCountGroupByDate" resultMap="BlogResult">
+		SELECT DATE_FORMAT(release_date,'%Y年%m月') releaseDateStr,
+		COUNT(*) blogCount
+		FROM blog
+		GROUP BY DATE_FORMAT(release_date,'%Y年%m月')
+	</select>
+	
+	<select id="findBlogList" parameterType="Map" resultMap="BlogResult"> 
+		SELECT * 
+		FROM blog 
+		<where>
+			<if test="typeId!=null and typeId!=''">
+				and type_id = #{typeId}
+			</if>
+			<if test="releaseDateStr!=null and releaseDateStr!=''">
+				and DATE_FORMAT(release_date,'%Y年%m月') = #{releaseDateStr}
+			</if>
+		</where>
+		ORDER BY release_date DESC 
+		LIMIT #{start},#{pageSize}
+	</select>
+
+	<select id="getTotal" parameterType="Map" resultType="long">
+		SELECT COUNT(*) 
+		FROM blog
+		<where>
+			<if test="typeId!=null and typeId!=''">
+				and type_id = #{typeId}
+			</if>
+			<if test="releaseDateStr!=null and releaseDateStr!=''">
+				and DATE_FORMAT(release_date,'%Y年%m月') = #{releaseDateStr}
+			</if>
+		</where>
+	</select>
+
+	<select id="findBlogById" parameterType="Integer" resultMap="BlogResult">
+		SELECT *
+		FROM blog
+		where id=#{id}
+	</select>
+	
+	<select id="updateClickHit" parameterType="Blog">
+		update blog
+		<set>
+			<if test="clickHit!=null">
+				click_hit = #{clickHit},
+			</if>
+		</set>
+		where id=#{id}
+	</select>
+	
+	
+	<select id="getPrevious" parameterType="int" resultMap="BlogResult">
+		SELECT *
+		FROM blog
+		where id &lt; #{id} 
+		order by id desc
+		limit 1
+	</select>
+	
+	<select id="getNext" parameterType="int" resultMap="BlogResult">
+		SELECT *
+		FROM blog
+		where id &gt; #{id} 
+		order by id asc
+		limit 1
+	</select>
+	
+
+</mapper>

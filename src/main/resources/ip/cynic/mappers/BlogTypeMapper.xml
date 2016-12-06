@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ip.cynic.dao.BlogTypeDao">
+
+	<resultMap type="BlogType" id="BlogType">
+		<result property="id" column="id"/>
+		<result property="typeName" column="type_name"/>
+		<result property="orderNo" column="order_no"/>
+
+	</resultMap>
+
+	<select id="findBlogCountByType" resultMap="BlogType">
+		SELECT t.type_name, t.id, COUNT(t.type_name) blogCount
+		FROM blog_type t 
+		LEFT JOIN blog b ON t.id=b.type_id
+		GROUP BY t.type_name, t.id
+		ORDER BY t.order_no
+	</select>
+
+	<select id="fingTypeById" parameterType="int" resultMap="BlogType">
+		SELECT *
+		FROM blog_type
+		WHERE id=#{id}
+	</select>
+
+
+</mapper>
